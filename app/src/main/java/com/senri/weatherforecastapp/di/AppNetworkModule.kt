@@ -37,6 +37,8 @@ class AppNetworkModule {
             .build()
     }
 
+    @Singleton
+    @Provides
     fun providesRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())

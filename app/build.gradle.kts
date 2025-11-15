@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
 }
 
@@ -77,4 +78,5 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit.mock)
     implementation(libs.retrofit2.kotlin.coroutines.adapter)
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }
