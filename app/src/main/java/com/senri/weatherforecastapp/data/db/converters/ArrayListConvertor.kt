@@ -9,7 +9,7 @@ import java.lang.reflect.Type
 class ArrayListConvertor {
 
     @TypeConverter
-    fun fromWeatherList(value: List<WeatherEntity>): String {
+    fun fromWeatherList(value: List<WeatherEntity>?): String {
 
         return Gson().toJson(value)
     }

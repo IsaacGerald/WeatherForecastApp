@@ -9,9 +9,10 @@ data class WeatherResponseWithItem(
     @Embedded val weatherResponseEntity: WeatherResponseEntity,
     @Relation(
         parentColumn = "id",
-        entityColumn = "responseId"
+        entityColumn = "responseId",
+        entity = WeatherItemEntity::class
     )
-    val weatherItemEntity: List<WeatherItemEntity>
+    val weatherItemEntity: List<WeatherItemAndDetails>
 )
 
 

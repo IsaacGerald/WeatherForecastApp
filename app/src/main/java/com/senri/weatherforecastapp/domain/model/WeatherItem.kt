@@ -1,5 +1,13 @@
 package com.senri.weatherforecastapp.domain.model
 
+import com.google.gson.annotations.SerializedName
+import com.senri.weatherforecastapp.data.model.response.CloudsResponse
+import com.senri.weatherforecastapp.data.model.response.MainResponse
+import com.senri.weatherforecastapp.data.model.response.RainResponse
+import com.senri.weatherforecastapp.data.model.response.SysResponse
+import com.senri.weatherforecastapp.data.model.response.WeatherResponse
+import com.senri.weatherforecastapp.data.model.response.WindResponse
+
 data class WeatherItem(
     val clouds: Clouds? = null,
     val dt: Int? = null,
@@ -12,4 +20,6 @@ data class WeatherItem(
     val weather: List<Weather>? = null,
     val wind: Wind? = null
 )
+
+
 

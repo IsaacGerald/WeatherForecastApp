@@ -1,6 +1,7 @@
 package com.senri.weatherforecastapp.di
 
 import android.app.Application
+import android.content.Context
 import com.senri.weatherforecastapp.data.db.WeatherDb
 import com.senri.weatherforecastapp.data.network.WeatherService
 import com.senri.weatherforecastapp.data.repository.WeatherRepositoryImpl
@@ -34,8 +35,8 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun providesWeatherDb(@ApplicationContext application: Application, coroutineScope: CoroutineScope): WeatherDb {
-        return WeatherDb.invoke(application, coroutineScope)
+    fun providesWeatherDb(@ApplicationContext context: Context, coroutineScope: CoroutineScope): WeatherDb {
+        return WeatherDb.invoke(context , coroutineScope)
     }
 
     @Singleton

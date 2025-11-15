@@ -1,5 +1,6 @@
 package com.senri.weatherforecastapp.data.model.response
 
+import com.google.gson.annotations.SerializedName
 import com.senri.weatherforecastapp.data.db.entity.WeatherResponseEntity
 import kotlinx.serialization.SerialName
 
@@ -7,7 +8,7 @@ data class WeatherForecastResponse(
     val city: CityResponse? = null,
     val cnt: Int? = null,
     val cod: String? = null,
-    @SerialName("list")
+    @SerializedName("list")
     val data: List<WeatherForecastResponseData>? = null,
     val message: Int? = null
 )

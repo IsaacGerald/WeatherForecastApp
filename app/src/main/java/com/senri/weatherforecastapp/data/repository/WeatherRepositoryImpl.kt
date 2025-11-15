@@ -1,14 +1,17 @@
 package com.senri.weatherforecastapp.data.repository
 
+import androidx.compose.material3.TimeInput
 import com.senri.weatherforecastapp.common.Constants
 import com.senri.weatherforecastapp.common.util.Resource
 import com.senri.weatherforecastapp.data.db.dao.WeatherDao
+import com.senri.weatherforecastapp.data.db.entity.relation.toWeatherItem
 import com.senri.weatherforecastapp.data.db.entity.toWeatherResponse
 import com.senri.weatherforecastapp.data.model.response.toCloudsEntity
 import com.senri.weatherforecastapp.data.model.response.toMainEntity
 import com.senri.weatherforecastapp.data.model.response.toRainEntity
 import com.senri.weatherforecastapp.data.model.response.toSysEntity
 import com.senri.weatherforecastapp.data.model.response.toWeatherItemEntity
+import com.senri.weatherforecastapp.data.model.response.toWeatherResponseEntity
 import com.senri.weatherforecastapp.data.model.response.toWindEntity
 import com.senri.weatherforecastapp.data.network.WeatherService
 import com.senri.weatherforecastapp.domain.model.WeatherResponse
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.Dispatcher
+import timber.log.Timber
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(
@@ -44,8 +48,11 @@ class WeatherRepositoryImpl @Inject constructor(
                 lang = "en"
             )
 
+            val weatherResponseEntity = response.toWeatherResponseEntity()
+
+
             val weatherItemEntity = response.data?.map { weather ->
-                weather.toWeatherItemEntity()
+                weather.toWeatherItemEntity().copy(responseId = weatherResponseEntity.id ?: -1)
             } ?: emptyList()
 
             val cloudsEntity = response.data?.mapNotNull { weather ->
@@ -70,6 +77,7 @@ class WeatherRepositoryImpl @Inject constructor(
 
             weatherDao.deleteAllWeatherResponse()
 
+            weatherDao.insertWeatherResponse(weatherResponseEntity)
             weatherDao.insertWeatherItems(weatherItemEntity)
             weatherDao.insertClouds(cloudsEntity)
             weatherDao.insertMain(mainEntity)
@@ -90,9 +98,11 @@ class WeatherRepositoryImpl @Inject constructor(
 
     private suspend fun fetchWeatherForecastFromDb(): WeatherResponse? {
         val entity = weatherDao.getWeatherResponseWithItems().firstOrNull()
-        val data = entity?.weatherResponseEntity?.toWeatherResponse()
-//            ?.copy(weatherItem = entity.weatherItemEntity)
-        return data
+
+        val weatherItem = entity?.weatherItemEntity?.map { it.toWeatherItem() } ?: emptyList()
+        val weatherResponse = entity?.weatherResponseEntity?.toWeatherResponse()?.copy(weatherItem = weatherItem)
+
+        return weatherResponse
     }
 
 }

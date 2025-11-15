@@ -2,10 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.hilt.android)
     id("kotlin-kapt")
 }
-
 android {
     namespace = "com.senri.weatherforecastapp"
     compileSdk {
@@ -78,5 +77,10 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit.mock)
     implementation(libs.retrofit2.kotlin.coroutines.adapter)
+
+    //timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //coil
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
 }

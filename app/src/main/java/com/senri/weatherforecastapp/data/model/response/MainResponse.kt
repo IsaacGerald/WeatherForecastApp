@@ -1,24 +1,25 @@
 package com.senri.weatherforecastapp.data.model.response
 
+import com.google.gson.annotations.SerializedName
 import com.senri.weatherforecastapp.data.db.entity.MainEntity
 import kotlinx.serialization.SerialName
 
 data class MainResponse(
-    @SerialName("feels_like")
+    @SerializedName("feels_like")
     val feelsLike: Double? = null,
-    @SerialName("grnd_level")
+    @SerializedName("grnd_level")
     val grndLevel: Int? = null,
     val humidity: Int? = null,
     val pressure: Int? = null,
-    @SerialName("sea_level")
+    @SerializedName("sea_level")
     val seaLevel: Int? = null,
-    @SerialName("")
+    @SerializedName("")
     val temp: Double? = null,
-    @SerialName("temp_kf")
+    @SerializedName("temp_kf")
     val tempKf: Double? = null,
-    @SerialName("temp_max")
+    @SerializedName("temp_max")
     val tempMax: Double? = null,
-    @SerialName("temp_min")
+    @SerializedName("temp_min")
     val tempMin: Double? = null
 )
 

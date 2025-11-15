@@ -1,8 +1,11 @@
 package com.senri.weatherforecastapp.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.senri.weatherforecastapp.common.atMidnight
+import com.senri.weatherforecastapp.common.toDate
+import com.senri.weatherforecastapp.common.todayAtMidnight
+import com.senri.weatherforecastapp.common.tomorrowAtMidnight
 import com.senri.weatherforecastapp.common.util.Resource
 import com.senri.weatherforecastapp.domain.model.WeatherItem
 import com.senri.weatherforecastapp.domain.usecase.GetWeatherUseCase
@@ -75,21 +78,6 @@ class WeatherForecastViewmodel @Inject constructor(
 
 
 
-
-    fun Long.toDate(): Date {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = this * 1000  // convert seconds → millis
-
-        // Normalize to midnight so same date = same key
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
-
-       return calendar.time
-    }
-
     fun groupByDate(weatherItem: List<WeatherItem>): Map<Date, List<WeatherItem>> {
         val calendar = Calendar.getInstance()
         return weatherItem.groupBy { item ->
@@ -108,14 +96,14 @@ class WeatherForecastViewmodel @Inject constructor(
     }
 
     fun getTodayWeatherForecast(mappedDates: Map<Date, List<WeatherItem>>): List<WeatherItem> {
-       return mappedDates.filter { (key, value) ->
+       return mappedDates.filter { (key, _) ->
            key.atMidnight() == todayAtMidnight()
        }.values.flatten()
     }
 
     fun getFutureForecast(mappedDates: Map<Date, List<WeatherItem>>): List<WeatherItem> {
-        return mappedDates.filter { (key, value) ->
-            key.atMidnight() > todayAtMidnight()
+        return mappedDates.filter { (key, _) ->
+            key.atMidnight() >= tomorrowAtMidnight()
         }.values.flatten()
     }
 
@@ -126,24 +114,7 @@ class WeatherForecastViewmodel @Inject constructor(
 
     }
 
-    fun Date.atMidnight(): Date {
-        val cal = Calendar.getInstance()
-        cal.time = this
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal.time
-    }
 
-    fun todayAtMidnight(): Date {
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal.time
-    }
 
 
 }

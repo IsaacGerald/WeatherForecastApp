@@ -20,7 +20,7 @@ import com.senri.weatherforecastapp.data.db.entity.WeatherResponseEntity
 import com.senri.weatherforecastapp.data.db.entity.WindEntity
 import kotlinx.coroutines.CoroutineScope
 
-@Database(exportSchema = false, version = 1, entities = [
+@Database(exportSchema = false, version = 3, entities = [
     CloudsEntity::class,
     CoordEntity::class,
     MainEntity::class,
