@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.senri.weatherforecastapp.presentation.theme.WeatherForecastAppTheme
 import com.senri.weatherforecastapp.presentation.ui.screens.HomeScreen
+import com.senri.weatherforecastapp.presentation.viewmodel.WeatherForecastState
 import com.senri.weatherforecastapp.presentation.viewmodel.WeatherForecastViewmodel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherForecastAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(modifier = Modifier.padding(innerPadding)) {
+                    HomeScreen(modifier = Modifier.padding(innerPadding), weatherForecastState = WeatherForecastState()) {
                       weatherForecastViewModel.getWeatherForecast(
                           lat = 1.2754232230063174,
                           lon = 36.95509013322898
@@ -45,6 +46,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     WeatherForecastAppTheme {
-        HomeScreen() { }
+        HomeScreen(weatherForecastState = WeatherForecastState()) { }
     }
 }

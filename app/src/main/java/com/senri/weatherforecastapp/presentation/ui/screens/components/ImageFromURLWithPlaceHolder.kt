@@ -1,4 +1,4 @@
-package com.senri.weatherforecastapp.presentation.ui.screens
+package com.senri.weatherforecastapp.presentation.ui.screens.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
@@ -6,16 +6,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun ImageFromURLWithPlaceHolder(
     modifier: Modifier,
     imageUrl: String,
     contentDescription: String,
-    @DrawableRes placeholder: Int
+    @DrawableRes placeholder: Int,
+    contentScale: ContentScale = ContentScale.Crop
 ){
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -25,7 +25,7 @@ fun ImageFromURLWithPlaceHolder(
         error = painterResource(placeholder),
         placeholder = painterResource(placeholder),
         contentDescription = contentDescription,
-        contentScale = ContentScale.Crop,
+        contentScale = contentScale,
         modifier = modifier,
     )
 }
