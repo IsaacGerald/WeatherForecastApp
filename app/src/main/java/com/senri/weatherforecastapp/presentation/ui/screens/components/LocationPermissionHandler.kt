@@ -71,7 +71,7 @@ fun LocationPermissionHandler(
         AlertDialog(
             onDismissRequest = { showRationale = false },
             title = { Text("Location Permission Required") },
-            text = { Text("This app needs location permissions to show your current location on the map.") },
+            text = { Text("This app needs location permissions to get weather forecast based on your current location") },
             confirmButton = {
                 Button(
                     onClick = {

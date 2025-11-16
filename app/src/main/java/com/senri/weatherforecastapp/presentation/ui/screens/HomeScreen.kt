@@ -234,7 +234,7 @@ fun HomeScreen(
             AlertDialog(
                 onDismissRequest = { showPermissionDialog = false },
                 title = { Text("Permission Required") },
-                text = { Text("Location permission is required to use this feature. Please enable it in app settings.") },
+                text = { Text("Location permission is required to get weather forecast based on your current location. Please enable it in app settings.") },
                 confirmButton = {
                     Button(
                         onClick = {
