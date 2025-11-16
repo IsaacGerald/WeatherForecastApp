@@ -10,6 +10,7 @@ import com.senri.weatherforecastapp.data.db.entity.WeatherEntity
 import com.senri.weatherforecastapp.data.db.entity.WeatherItemEntity
 import com.senri.weatherforecastapp.data.db.entity.WindEntity
 import com.senri.weatherforecastapp.data.db.entity.toCloud
+import com.senri.weatherforecastapp.data.db.entity.toMain
 import com.senri.weatherforecastapp.data.db.entity.toRain
 import com.senri.weatherforecastapp.data.db.entity.toSys
 import com.senri.weatherforecastapp.data.db.entity.toWeather
@@ -61,7 +62,8 @@ fun WeatherItemAndDetails.toWeatherItem() = WeatherItem(
     clouds = cloudsEntity.toCloud(),
     rain = rainEntity?.toRain(),
     sys = sysEntity.toSys(),
-    wind = windEntity.toWind()
+    wind = windEntity.toWind(),
+    main = mainEntity.toMain()
 )
 
 

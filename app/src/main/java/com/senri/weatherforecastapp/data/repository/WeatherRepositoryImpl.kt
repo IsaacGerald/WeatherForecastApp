@@ -1,5 +1,6 @@
 package com.senri.weatherforecastapp.data.repository
 
+import android.location.Location
 import androidx.compose.material3.TimeInput
 import com.senri.weatherforecastapp.common.Constants
 import com.senri.weatherforecastapp.common.util.Resource
@@ -31,8 +32,7 @@ class WeatherRepositoryImpl @Inject constructor(
 
 
     override fun getWeatherForecast(
-        latitude: Double,
-        longitude: Double
+        location: Location?
     ): Flow<Resource<WeatherResponse>> = flow {
 
         try {
@@ -40,9 +40,11 @@ class WeatherRepositoryImpl @Inject constructor(
 
             emit(Resource.Loading(data = data))
 
+            if (location == null) return@flow
+
             val response = weatherService.getWeatherForecast(
-                lat = latitude,
-                lon = longitude,
+                lat = location.latitude,
+                lon = location.longitude,
                 appId = Constants.APP_ID,
                 units = "metric",
                 lang = "en"

@@ -22,6 +22,7 @@ fun WeatherForecastResponseData.toWeatherItemEntity() = WeatherItemEntity(
     dtTxt = dtTxt,
     pop = pop,
     visibility = visibility,
-    responseId = -1
+    responseId = -1,
+    weather = weather?.map { it.toWeatherEntity() }
 
 )

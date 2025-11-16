@@ -2,7 +2,9 @@ package com.senri.weatherforecastapp.domain.model
 
 import com.senri.weatherforecastapp.data.db.entity.MainEntity
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Main(
     val feelsLike: Double? = null,
     val grndLevel: Int? = null,

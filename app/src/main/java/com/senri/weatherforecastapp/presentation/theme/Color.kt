@@ -1,5 +1,6 @@
 package com.senri.weatherforecastapp.presentation.theme
 
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)

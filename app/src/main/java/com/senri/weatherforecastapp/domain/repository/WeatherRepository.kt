@@ -1,5 +1,6 @@
 package com.senri.weatherforecastapp.domain.repository
 
+import android.location.Location
 import com.senri.weatherforecastapp.common.util.Resource
 import com.senri.weatherforecastapp.domain.model.WeatherResponse
 import kotlinx.coroutines.flow.Flow
@@ -7,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface WeatherRepository {
 
      fun getWeatherForecast(
-        latitude: Double,
-        longitude: Double,
+         location: Location?
     ): Flow<Resource<WeatherResponse>>
 }

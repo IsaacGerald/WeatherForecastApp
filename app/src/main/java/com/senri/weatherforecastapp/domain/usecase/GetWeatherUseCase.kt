@@ -1,5 +1,6 @@
 package com.senri.weatherforecastapp.domain.usecase
 
+import android.location.Location
 import com.senri.weatherforecastapp.common.util.Resource
 import com.senri.weatherforecastapp.domain.model.WeatherResponse
 import com.senri.weatherforecastapp.domain.repository.WeatherRepository
@@ -10,7 +11,7 @@ class GetWeatherUseCase @Inject constructor(
     private val weatherRepository: WeatherRepository
 ) {
 
-     operator fun invoke(lat: Double, long: Double ): Flow<Resource<WeatherResponse>> {
-        return weatherRepository.getWeatherForecast(latitude = lat, longitude = long)
+     operator fun invoke(location: Location?): Flow<Resource<WeatherResponse>> {
+        return weatherRepository.getWeatherForecast(location)
     }
 }

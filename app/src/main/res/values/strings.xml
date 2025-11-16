@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">WeatherForecastApp</string>
+    <string name="feels_like">Feels like %1$s</string>
+    <string name="today">Today, %1$s</string>
+    <string name="today_s_forecast">Today\'s Forecast</string>
+    <string name="weather">Weather</string>
+    <string name="_5_days_forecast">5 - days Forecast</string>
+    <string name="hourly_forecast">Hourly forecast</string>
 </resources>

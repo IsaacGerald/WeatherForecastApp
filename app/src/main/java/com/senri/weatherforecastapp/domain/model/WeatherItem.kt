@@ -7,6 +7,9 @@ import com.senri.weatherforecastapp.data.model.response.RainResponse
 import com.senri.weatherforecastapp.data.model.response.SysResponse
 import com.senri.weatherforecastapp.data.model.response.WeatherResponse
 import com.senri.weatherforecastapp.data.model.response.WindResponse
+import kotlinx.serialization.Serializable
+
+@Serializable
 
 data class WeatherItem(
     val clouds: Clouds? = null,

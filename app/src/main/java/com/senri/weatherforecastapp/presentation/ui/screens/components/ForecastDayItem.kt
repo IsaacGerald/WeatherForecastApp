@@ -9,12 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,21 +24,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.senri.weatherforecastapp.R
 import com.senri.weatherforecastapp.common.checkDay
+import com.senri.weatherforecastapp.common.toHourOnly12Hour
 import com.senri.weatherforecastapp.domain.model.WeatherItem
 
 
 @Composable
-fun ForecastWeatherItem(
+fun ForecastDayItem(
     weatherItem: WeatherItem,
-    onClickAction: () -> Unit
 ){
     Column(modifier = Modifier.fillMaxWidth()
         .padding(top = 4.dp)) {
 
     Row(
-        modifier = Modifier.clickable{
-            onClickAction()
-        },
         verticalAlignment = Alignment.CenterVertically,
         ) {
         Box(
@@ -51,7 +43,7 @@ fun ForecastWeatherItem(
                 .weight(1f) ,     // ← equal width for every item
         ) {
             Text(
-                text = weatherItem.dt?.toLong()?.checkDay() ?: "",
+                text = weatherItem.dt?.toLong()?.toHourOnly12Hour() ?: "",
                 style = TextStyle(fontSize = 16.sp, color = Color.White),
                 textAlign = TextAlign.Start
             )
@@ -81,15 +73,6 @@ fun ForecastWeatherItem(
                 style = TextStyle(fontSize = 14.sp, color = Color.White)
             )
         }
-
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Next",
-                modifier = Modifier.size(12.dp).padding(start = 16.dp),
-                tint = Color.White,
-            )
-
     }
 
         HorizontalDivider(
@@ -102,6 +85,6 @@ fun ForecastWeatherItem(
 
 @Preview
 @Composable
-fun ForecastWeatherItemPreview(){
-    ForecastWeatherItem(weatherItem = WeatherItem()){}
+fun ForecastDayItemPreview(){
+    ForecastDayItem(weatherItem = WeatherItem())
 }

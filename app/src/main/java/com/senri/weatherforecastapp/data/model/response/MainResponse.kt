@@ -13,7 +13,6 @@ data class MainResponse(
     val pressure: Int? = null,
     @SerializedName("sea_level")
     val seaLevel: Int? = null,
-    @SerializedName("")
     val temp: Double? = null,
     @SerializedName("temp_kf")
     val tempKf: Double? = null,
