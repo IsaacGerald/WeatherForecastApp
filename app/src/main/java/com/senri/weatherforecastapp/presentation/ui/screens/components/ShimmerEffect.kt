@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
-import com.touchlab.kampkit.ui.theme.Grey
 
 fun Modifier.shimmerEffect(): Modifier = composed {
     var size by remember {
@@ -29,17 +28,16 @@ fun Modifier.shimmerEffect(): Modifier = composed {
         initialValue = -2 * size.width.toFloat(),
         targetValue = 2 * size.width.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearOutSlowInEasing)
+            animation = tween(1600, easing = LinearOutSlowInEasing)
         )
     )
 
     background(
         brush = Brush.linearGradient(
             colors = listOf(
-                Color(0xFFB8B5B5).copy(alpha = 0.5f),
-                Color(0xFFF7F7F7),
-                //Color(0xFF8F8B8B),
-                Color(0xFFB8B5B5).copy(alpha = 0.5f),
+                Color.LightGray.copy(alpha = 0.3f),
+                Color.White.copy(alpha = 0.6f),
+                Color.LightGray.copy(alpha = 0.3f)
             ),
             start = Offset(startOffsetX, 0f),
             end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())

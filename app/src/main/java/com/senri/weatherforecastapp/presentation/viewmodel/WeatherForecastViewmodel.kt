@@ -58,20 +58,20 @@ class WeatherForecastViewmodel @Inject constructor(
 
     fun getWeatherForecast(location: Location?) {
         getWeatherUseCase(location).onEach { resource ->
+            Timber.d("State: $resource")
             when (resource) {
                 is Resource.Error -> {
-//                    _weatherForecastState.update {
-//                        WeatherForecastState(errorMessage = resource.message ?: "")
-//                    }
+
+                    _weatherForecastState.update {
+                        it.copy(errorMessage = resource.message ?: "", loading = false)
+                    }
                 }
 
                 is Resource.Loading -> {
                     if (resource.data?.weatherItem?.isNotEmpty() == true) {
                         updateUiState(resource.data, isLoading = true)
                     } else {
-                        _weatherForecastState.update {
-                            it.copy(loading = false)
-                        }
+                        updateUiState(resource.data ?: WeatherResponse(), isLoading = true)
                     }
                 }
 
@@ -107,6 +107,7 @@ class WeatherForecastViewmodel @Inject constructor(
                 todayWeatherForecast = todayWeatherForecast,
                 futureWeatherForecast = futureWeatherForecast
             )
+
         }
     }
 

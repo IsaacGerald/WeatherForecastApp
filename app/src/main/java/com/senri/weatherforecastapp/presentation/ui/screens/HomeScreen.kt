@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,7 +30,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,15 +68,21 @@ import com.senri.weatherforecastapp.common.util.LocationState
 import com.senri.weatherforecastapp.presentation.navigation.Screen
 import com.senri.weatherforecastapp.presentation.theme.PrimaryBlack
 import com.senri.weatherforecastapp.presentation.theme.TertiaryBlack
+import com.senri.weatherforecastapp.presentation.ui.screens.components.ErrorScreen
+import com.senri.weatherforecastapp.presentation.ui.screens.components.ForecastShimmerWeatherItem
 import com.senri.weatherforecastapp.presentation.ui.screens.components.ForecastWeatherItem
+import com.senri.weatherforecastapp.presentation.ui.screens.components.HourlyShimmerWeatherItem
 import com.senri.weatherforecastapp.presentation.ui.screens.components.HourlyWeatherItem
 import com.senri.weatherforecastapp.presentation.ui.screens.components.ImageFromURLWithPlaceHolder
 import com.senri.weatherforecastapp.presentation.ui.screens.components.LocationPermissionHandler
 import com.senri.weatherforecastapp.presentation.ui.screens.components.PullToRefreshBox
 import com.senri.weatherforecastapp.presentation.viewmodel.WeatherForecastState
 import com.senri.weatherforecastapp.presentation.viewmodel.WeatherForecastViewmodel
+import com.touchlab.kampkit.ui.global_components.shimmer.shimmerEffect
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okhttp3.internal.wait
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,12 +105,18 @@ fun HomeScreen(
     var location by remember { mutableStateOf<Location?>(null) }
     val context = LocalContext.current
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val scope = rememberCoroutineScope()
 
 
-    if (checkLocationPermission){
+
+
+    if (checkLocationPermission) {
         LocationPermissionHandler(
             onPermissionGranted = {
                 weatherViewModel.startLocationTracking()
+                weatherViewModel.getWeatherForecast(location)
                 showPermissionDialog = false
                 checkLocationPermission = false
             },
@@ -117,70 +135,98 @@ fun HomeScreen(
             }
 
             is LocationState.Loading -> {
-//                Toast.makeText(context, "Getting your location...", Toast.LENGTH_LONG)
-//                    .show()
+
             }
 
             is LocationState.Success -> {
                 location = state.location
+                weatherViewModel.stopLocationTracking()
                 weatherViewModel.getWeatherForecast(state.location)
             }
 
             is LocationState.Error -> {
 
-//                Toast.makeText(context, "${state.message}. Please move your device", Toast.LENGTH_LONG)
-//                    .show()
+                Toast.makeText(context, "${state.message}. Please move your device", Toast.LENGTH_LONG)
+                    .show()
 
             }
         }
     }
 
-    LaunchedEffect(Unit) {
-        weatherViewModel.getWeatherForecast(location)
-    }
 
 
     val window = (context as Activity).window
 
     LaunchedEffect(Unit) {
-        // Change status bar color
         window.statusBarColor = PrimaryBlack.toArgb()
 
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            false
     }
 
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = PrimaryBlack
+        containerColor = PrimaryBlack,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    modifier = Modifier.padding(16.dp),
+                    contentColor = Color.White
+                )
+            }
+        }
     ) { innerPadding ->
         PullToRefreshBox(
-            isRefreshing = weatherState.loading,
+            isRefreshing = weatherState.loading && weatherState.futureWeatherForecast.isNotEmpty(),
             onRefresh = {
-                if (location != null){
+                if (location != null) {
+                    weatherViewModel.startLocationTracking()
                     weatherViewModel.getWeatherForecast(location)
-                }else{
+                } else {
                     checkLocationPermission = true
                 }
             },
             modifier = Modifier.padding(innerPadding)
         ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LocationComponent(weatherState)
+            if (weatherState.errorMessage.isNotBlank() && weatherState.futureWeatherForecast.isEmpty()){
+                ErrorScreen(
+                    modifier = Modifier,
+                    message = weatherState.errorMessage,
+                    onRetry = {
+                        weatherViewModel.getWeatherForecast(location)
+                    }
+                )
+            }else{
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LocationComponent(weatherState)
 
-                TodayWeatherComponent(weatherState)
+                    TodayWeatherComponent(weatherState)
 
-                HourlyWeatherComponent(weatherState)
+                    HourlyWeatherComponent(weatherState)
 
-                ForeCastWeatherComponent(weatherState, navController)
+                    ForeCastWeatherComponent(weatherState, navController)
+                }
+
+                if (weatherState.errorMessage.isNotEmpty()){
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = weatherState.errorMessage,
+                            actionLabel = "Ok"
+                        )
+                    }
+                }
             }
+
+
         }
 
 
@@ -215,12 +261,12 @@ fun HomeScreen(
             shouldOpenAppSettings = false
         }
 
-        if (shouldShowErrorDialog){
+        if (shouldShowErrorDialog) {
             AlertDialog(
                 onDismissRequest = {
                     shouldShowErrorDialog = false
                     errorMessage = ""
-                                   },
+                },
                 title = { Text("Error") },
                 text = { Text(errorMessage) },
                 confirmButton = {
@@ -253,72 +299,125 @@ private fun LocationComponent(weatherState: WeatherForecastState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Image(
-            modifier = Modifier.size(24.dp),
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = "",
-            colorFilter = ColorFilter.tint(Color.White)
-        )
+        if (weatherState.loading && weatherState.weatherResponse == null) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .shimmerEffect(),
 
-        Text(
-            modifier = Modifier.padding(start = 8.dp),
-            text = weatherState.weatherResponse?.name ?: "---",
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Normal
+                )
+
+            Text(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .width(80.dp)
+                    .shimmerEffect(),
+                text = "",
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White
             )
-        )
+        } else {
+            Image(
+                modifier = Modifier.size(24.dp),
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "",
+                colorFilter = ColorFilter.tint(Color.White)
+            )
+
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = weatherState.weatherResponse?.name ?: "---",
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White
+            )
+        }
 
     }
 }
 
 @Composable
 private fun TodayWeatherComponent(weatherState: WeatherForecastState) {
-    Row(modifier = Modifier.padding(32.dp)) {
-        ImageFromURLWithPlaceHolder(
-            modifier = Modifier.size(180.dp),
-            imageUrl = "${weatherState.currentWeather?.weather?.firstOrNull()?.icon}",
-            placeholder = R.drawable.rain_ic,
-            contentDescription = "Weather",
-            contentScale = ContentScale.Crop
-        )
 
-        Column() {
+    if (weatherState.loading && weatherState.todayWeatherForecast.isEmpty()) {
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
-                text = "${weatherState.currentWeather?.main?.temp ?: 0.0} F°",
-                style = TextStyle(
-                    fontSize = 42.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                modifier = Modifier
+                    .width(100.dp)
+                    .shimmerEffect(),
+                text = "",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
             )
             Text(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(150.dp)
+                    .shimmerEffect(),
+                text = "",
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White.copy(alpha = 0.3f)
+            )
+            Text(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(100.dp)
+                    .shimmerEffect(),
+                text = "",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
+            )
+            Text(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .width(150.dp)
+                    .shimmerEffect(),
+                text = "",
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White.copy(alpha = 0.3f)
+            )
+
+
+        }
+    } else {
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "${weatherState.currentWeather?.main?.temp ?: 0.0} F°",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
+            )
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(
                     R.string.feels_like,
                     weatherState.currentWeather?.main?.feelsLike ?: 0.0
                 ),
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    color = Color.White.copy(alpha = 0.3f)
-                )
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White.copy(alpha = 0.3f)
             )
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = weatherState.currentWeather?.weather?.firstOrNull()?.main ?: "---",
-                style = TextStyle(fontSize = 22.sp, color = Color.White)
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
             )
             Text(
+                modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.today, getCurrentDateFormatted()),
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    color = Color.White.copy(alpha = 0.3f)
-                )
+                style = MaterialTheme.typography.displayMedium,
+                color = Color.White.copy(alpha = 0.3f)
             )
 
 
         }
     }
+
+
 }
 
 @Composable
@@ -333,42 +432,68 @@ private fun HourlyWeatherComponent(weatherState: WeatherForecastState) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = stringResource(R.string.today_s_forecast),
-                style = TextStyle(fontSize = 14.sp, color = Color.White)
-            )
-            HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
 
-            if (weatherState.loading && weatherState.todayWeatherForecast.isEmpty()){
+            if (weatherState.loading && weatherState.todayWeatherForecast.isEmpty()) {
                 Text(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    text = "Please Wait..", style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
-                    textAlign = TextAlign.Center
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .width(100.dp)
+                        .shimmerEffect(),
+                    text = "",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
                 )
-            }
+                HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
 
-            if (!weatherState.loading && weatherState.todayWeatherForecast.isEmpty()){
-                Text(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    text = "No data found", style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            if (weatherState.todayWeatherForecast.isNotEmpty()){
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
                 ) {
-                    items(weatherState.todayWeatherForecast) { item ->
+                    items(5) { item ->
                         Box(
                             modifier = Modifier
                                 .fillParentMaxWidth(1f / weatherState.todayWeatherForecast.size),   // equal width
                             contentAlignment = Alignment.Center
                         ) {
-                            HourlyWeatherItem(item)
+                            HourlyShimmerWeatherItem()
+                        }
+                    }
+                }
+
+            } else if (!weatherState.loading && weatherState.todayWeatherForecast.isEmpty()) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    text = "No data found",
+                    style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
+                    textAlign = TextAlign.Center
+                )
+
+            } else {
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(R.string.today_s_forecast),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+                HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
+
+                if (weatherState.todayWeatherForecast.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        items(weatherState.todayWeatherForecast) { item ->
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxWidth(1f / weatherState.todayWeatherForecast.size),   // equal width
+                                contentAlignment = Alignment.Center
+                            ) {
+                                HourlyWeatherItem(item)
+                            }
                         }
                     }
                 }
@@ -394,47 +519,64 @@ private fun ForeCastWeatherComponent(
             modifier = Modifier.padding(16.dp)
         ) {
 
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = stringResource(R.string._5_days_forecast),
-                style = TextStyle(fontSize = 14.sp, color = Color.White)
-            )
-
-            HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
-
             if (weatherState.loading && weatherState.futureWeatherForecast.isEmpty()){
                 Text(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    text = "Please Wait..", style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
-                    textAlign = TextAlign.Center
+                    modifier = Modifier.padding(bottom = 8.dp).width(100.dp)
+                        .shimmerEffect(),
+                    text = "",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
                 )
-            }
 
-            if (!weatherState.loading && weatherState.futureWeatherForecast.isEmpty()){
-                Text(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    text = "No data found", style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            if (weatherState.futureWeatherForecast.isNotEmpty()){
+                HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
                 LazyColumn(
                     modifier = Modifier
                         .height(350.dp)
                         .fillMaxWidth()
                         .padding(top = 2.dp)
                 ) {
-                    items(weatherState.futureWeatherForecast) { item ->
-                        item.weatherItem.firstOrNull()?.let {
-                            ForecastWeatherItem(it){
-                                val dailyForecastJson = Json.encodeToString(item)
-                                navController.navigate("${Screen.Detail.route}/$dailyForecastJson/${weatherState.weatherResponse?.name ?: ""}")
+                    items(5) { item ->
+                        ForecastShimmerWeatherItem()
+                    }
+                }
+            }else if (!weatherState.loading && weatherState.futureWeatherForecast.isEmpty()){
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    text = "No data found",
+                    style = TextStyle(color = Color.White.copy(alpha = 0.3f)),
+                    textAlign = TextAlign.Center
+                )
+            }else{
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(R.string._5_days_forecast),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+
+                HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
+
+                if (weatherState.futureWeatherForecast.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .height(350.dp)
+                            .fillMaxWidth()
+                            .padding(top = 2.dp)
+                    ) {
+                        items(weatherState.futureWeatherForecast) { item ->
+                            item.weatherItem.firstOrNull()?.let {
+                                ForecastWeatherItem(it) {
+                                    val dailyForecastJson = Json.encodeToString(item)
+                                    navController.navigate("${Screen.Detail.route}/$dailyForecastJson/${weatherState.weatherResponse?.name ?: ""}")
+                                }
                             }
                         }
                     }
                 }
             }
+
         }
     }
 }

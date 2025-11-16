@@ -2,8 +2,15 @@ package com.senri.weatherforecastapp.presentation.ui.screens.components
 
 import android.graphics.Color
 import android.graphics.fonts.FontStyle
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.senri.weatherforecastapp.R
 import com.senri.weatherforecastapp.common.toHourOnly12Hour
 import com.senri.weatherforecastapp.domain.model.WeatherItem
+import com.touchlab.kampkit.ui.global_components.shimmer.shimmerEffect
 
 @Composable
 fun HourlyWeatherItem(
@@ -28,13 +36,10 @@ fun HourlyWeatherItem(
 
         Text(
             text = weatherItem.dt?.toLong()?.toHourOnly12Hour() ?: "",
-            style = TextStyle(fontSize = 14.sp, color = androidx.compose.ui.graphics.Color.White)
+            style = MaterialTheme.typography.labelMedium,
+            color = androidx.compose.ui.graphics.Color.White
         )
 
-//        Text(
-//            text = "${weatherItem.weather?.firstOrNull()?.main ?: ""} ",
-//            style = TextStyle(fontSize = 12.sp, color = androidx.compose.ui.graphics.Color.White)
-//        )
 
         ImageFromURLWithPlaceHolder(
             modifier = Modifier.size(48.dp),
@@ -46,7 +51,39 @@ fun HourlyWeatherItem(
 
         Text(
             text = "${weatherItem.main?.temp ?: 0.0} F°",
-            style = TextStyle(fontSize = 12.sp, color = androidx.compose.ui.graphics.Color.White)
+            style = MaterialTheme.typography.labelSmall,
+            color = androidx.compose.ui.graphics.Color.White
+        )
+    }
+}
+
+@Composable
+fun HourlyShimmerWeatherItem(
+) {
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = 2.dp)) {
+
+        Text(
+            modifier = Modifier.width(80.dp)
+                .shimmerEffect(),
+            text = "",
+            style = MaterialTheme.typography.labelMedium,
+            color = androidx.compose.ui.graphics.Color.White
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier.size(48.dp)
+                .shimmerEffect(),
+
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            modifier = Modifier.width(80.dp)
+                .shimmerEffect(),
+            text = "",
+            style = MaterialTheme.typography.labelSmall,
+            color = androidx.compose.ui.graphics.Color.White
         )
     }
 }

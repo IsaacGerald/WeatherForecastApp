@@ -3,6 +3,7 @@ package com.senri.weatherforecastapp.data.repository
 import android.location.Location
 import androidx.compose.material3.TimeInput
 import com.senri.weatherforecastapp.common.Constants
+import com.senri.weatherforecastapp.common.resolveException
 import com.senri.weatherforecastapp.common.util.Resource
 import com.senri.weatherforecastapp.data.db.dao.WeatherDao
 import com.senri.weatherforecastapp.data.db.entity.relation.toWeatherItem
@@ -92,7 +93,7 @@ class WeatherRepositoryImpl @Inject constructor(
 
 
         } catch (e: Exception) {
-            emit(Resource.Error(message = e.message ?: ""))
+            emit(Resource.Error(message = resolveException(e)))
         }
 
 

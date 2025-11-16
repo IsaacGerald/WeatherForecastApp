@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,7 +45,8 @@ fun ForecastDayItem(
         ) {
             Text(
                 text = weatherItem.dt?.toLong()?.toHourOnly12Hour() ?: "",
-                style = TextStyle(fontSize = 16.sp, color = Color.White),
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
                 textAlign = TextAlign.Start
             )
         }
@@ -70,7 +72,8 @@ fun ForecastDayItem(
         ) {
             Text(
                 text = "${weatherItem.main?.temp ?: 0.0} F°",
-                style = TextStyle(fontSize = 14.sp, color = Color.White)
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White,
             )
         }
     }

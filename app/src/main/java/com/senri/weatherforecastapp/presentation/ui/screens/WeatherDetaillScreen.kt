@@ -24,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -98,43 +99,46 @@ fun WeatherDetailScreen(
             Text(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 text = dailyForeCastModel.date.toDateDayFormat(),
-                style = TextStyle(
-                    fontSize = 42.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = Color.White
             )
 
-            Box(
+            DayWeatherDetails(dailyForeCastModel)
+        }
+    }
+}
+
+@Composable
+private fun DayWeatherDetails(dailyForeCastModel: DailyForecastModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 32.dp)
+            .padding(horizontal = 16.dp)
+            .background(color = TertiaryBlack, shape = RoundedCornerShape(8.dp))
+
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                modifier = Modifier.padding(bottom = 10.dp),
+                text = stringResource(R.string.hourly_forecast),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White
+            )
+
+            HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
+            LazyColumn(
                 modifier = Modifier
+                    .height(500.dp)
                     .fillMaxWidth()
-                    .padding(top = 32.dp)
-                    .padding(horizontal = 16.dp)
-                    .background(color = TertiaryBlack, shape = RoundedCornerShape(8.dp))
-
+                    .padding(top = 2.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        modifier = Modifier.padding(bottom = 10.dp),
-                        text = stringResource(R.string.hourly_forecast),
-                        style = TextStyle(fontSize = 14.sp, color = Color.White)
-                    )
+                items(dailyForeCastModel.weatherItem) { item ->
+                    ForecastDayItem(item)
 
-                    HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.3f))
-                    LazyColumn(
-                        modifier = Modifier
-                            .height(500.dp)
-                            .fillMaxWidth()
-                            .padding(top = 2.dp)
-                    ) {
-                        items(dailyForeCastModel.weatherItem) { item ->
-                            ForecastDayItem(item)
-
-                        }
-                    }
                 }
             }
         }
@@ -160,11 +164,8 @@ private fun LocationComponent(locationName: String) {
         Text(
             modifier = Modifier.padding(start = 8.dp),
             text = locationName,
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Normal
-            )
+            style = MaterialTheme.typography.displayMedium,
+            color = Color.White
         )
 
     }
